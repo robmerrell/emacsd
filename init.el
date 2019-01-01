@@ -97,10 +97,11 @@
     "<SPC>e" "errors"
     "<SPC>f" "files"
     "<SPC>g" "goto"
-    "<SPC>m" "magit"
+    "<SPC>m" "music"
     "<SPC>p" "project"
     "<SPC>s" "search"
-    "<SPC>t" "tests")
+    "<SPC>t" "tests"
+    "<SPC>v" "version control")
   :init
   (which-key-mode))
 
@@ -174,7 +175,7 @@
     :general
     (my-leader-def
       :states '(normal)
-      "ms" 'magit-status))
+      "vs" 'magit-status))
 
   ;; comment toggling
   (use-package evil-commentary
@@ -203,6 +204,17 @@
       :ensure t
       :defer t
       :hook (after-init . doom-modeline-init))
+
+;; music
+(use-package my-music
+  :general
+  (my-leader-def
+    :states '(normal)
+    "mn" 'itunes-now-playing
+    "mp" 'itunes-play
+    "ms" 'itunes-pause
+    "mn" 'itunes-next
+    "mr" 'itunes-previous))
 
 ;; rainbow delimiters
 (use-package rainbow-delimiters
@@ -237,7 +249,8 @@
     (setq projectile-completion-system 'default)
     (setq projectile-enable-caching t)
     (setq projectile-indexing-method 'native)
-    (add-to-list 'projectile-globally-ignored-directories "vendor"))
+    (add-to-list 'projectile-globally-ignored-directories "vendor")
+    (add-to-list 'projectile-globally-ignored-directories "elpa"))
   :config
   (projectile-mode))
 
