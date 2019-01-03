@@ -1,3 +1,10 @@
+;; open a new empty buffer
+(defun new-empty-buffer ()
+  "Create a new buffer called untitled(<n>)"
+  (interactive)
+  (let ((newbuf (generate-new-buffer-name "untitled")))
+    (switch-to-buffer newbuf)))
+
 ;; move back and forth between buffers
 (defun next-code-buffer ()
   (interactive)
