@@ -282,8 +282,9 @@
 
 (use-package go-mode
   :ensure t
+  :mode "\\.go\\'"
   :general
-  (my-leader-def
+  (my-leader-def go-mode-map
     :states '(normal)
     "gd" 'godef-jump
     "tc" 'go-run-current-test
@@ -315,8 +316,9 @@
   (progn
     (use-package racer
       :ensure t
+      :mode ("\\.rs\\'" . rust-mode)
       :general
-      (my-leader-def
+      (my-leader-def rust-mode-map
         :states '(normal)
         "dp" 'racer-describe
         "gd" 'racer-find-definition
