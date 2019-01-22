@@ -14,6 +14,7 @@
   (package-refresh-contents)
   (package-install 'use-package))
 
+
 (require 'use-package)
 
 
@@ -110,6 +111,7 @@
   :ensure t
   :config
   (general-create-definer my-leader-def :prefix "SPC")
+  (general-define-key :states 'insert "C-p" 'company-complete)
 
   ;; moving between buffers
   (my-leader-def
@@ -120,9 +122,11 @@
     "ff" 'find-file
     "fn" 'new-empty-buffer
 
-    "ir" 'indent-region
+    "sc" 'evil-ex-nohighlight)
 
-    "sc" 'evil-ex-nohighlight))
+  (my-leader-def
+    :states '(visual)
+    "ir" 'indent-region))
 
 ;; Avy
 (use-package avy
@@ -178,16 +182,18 @@
       "vs" 'magit-status))
 
   ;; comment toggling
-  (use-package evil-commentary
+  (use-package evil-nerd-commenter
     :ensure t
     :general
     (my-leader-def
       :states '(normal visual)
-      "cl" 'evil-commentary-line)
-    :config
-    (evil-commentary-mode))
+      "cl" 'evilnc-comment-or-uncomment-lines))
 
-  )
+  ;; surround
+  (use-package evil-surround
+    :ensure t
+    :config
+    (global-evil-surround-mode 1)))
 
 (use-package all-the-icons :ensure t)
 
@@ -197,6 +203,26 @@
   :init
   (setq nord-comment-brightness 15)
   (load-theme 'nord t))
+
+;; smartparens
+(use-package smartparens
+  :ensure t
+  :init
+  (smartparens-global-mode 1)
+  :config
+
+  (use-package smartparens-config)
+
+  (setq
+   smartparens-strict-mode t
+   sp-autoinsert-if-followed-by-word t
+   sp-autoskip-closing-pair 'always
+   sp-base-key-bindings 'paredit
+   sp-hybrid-kill-entire-symbol nil
+   sp-autoescape-string-quote nil
+   sp-highlight-pair-overlay nil
+   sp-highlight-wrap-overlay nil
+   sp-highlight-wrap-tag-overlay nil))
 
 ;; Modeline
 ;; run all-the-icons-install-fonts after install
@@ -210,7 +236,7 @@
   :general
   (my-leader-def
     :states '(normal)
-    "mn" 'itunes-now-playing
+    "mc" 'itunes-now-playing
     "mp" 'itunes-play
     "ms" 'itunes-pause
     "mn" 'itunes-next
@@ -241,6 +267,7 @@
     :states '(normal)
     "pf" 'projectile-find-file
     "pb" 'projectile-switch-to-buffer
+    "pr" 'projectile-switch-project
     "ps" 'projectile-ag
     "pi" 'projectile-invalidate-cache)
   :config
@@ -259,9 +286,10 @@
   :config
   (shackle-mode 1)
   (setq shackle-rules
-	`(("*go tests*" :align below :size 16 :select t)
-	  ("*Racer Help*" :align below :size 16 :select t)
-          ("*rust tests*" :align below :size 16 :select t))))
+	`(("*go tests*" :align below :size 25 :select t)
+          ("*godoc.*" :regexp t :align below :size 25 :select t)
+	  ("*Racer Help*" :align below :size 25 :select t)
+          ("*rust tests*" :align below :size 25 :select t))))
 
 
 ;;
@@ -269,17 +297,6 @@
 ;;
 
 (use-package my-go)
-(use-package go-guru :ensure t)
-
-(use-package go-eldoc
-  :ensure t
-  :general
-  (my-leader-def
-    :states '(normal)
-    "dp" 'godoc-at-point)
-  :config
-  (add-hook 'go-mode-hook 'go-eldoc-setup))
-
 (use-package go-mode
   :ensure t
   :mode "\\.go\\'"
@@ -291,6 +308,7 @@
     "tp" 'go-run-previous-test)
   :init
   (add-hook 'go-mode-hook (lambda () (setq tab-width 4)))
+  (add-hook 'go-mode-hook 'go-eldoc-setup)
   (setq gofmt-command "goimports")
   (setq gofmt-show-errors nil)
   (add-hook 'before-save-hook 'gofmt-before-save))
@@ -303,6 +321,17 @@
   :init
   (with-eval-after-load 'company
     (add-to-list 'company-backends 'company-go)))
+
+(use-package go-guru :ensure t)
+
+(use-package go-eldoc
+  :ensure t
+  :general
+  (my-leader-def
+    :states '(normal)
+    "dp" 'godoc-at-point)
+  :config
+  (add-hook 'go-mode-hook 'go-eldoc-setup))
 
 
 ;;

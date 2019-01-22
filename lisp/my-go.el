@@ -7,10 +7,15 @@
   (replace-regexp-in-string
    (concat (getenv "GOPATH") "/src/") "" (file-name-directory buffer-file-name)))
 
+(defun format-go-test-output (output)
+  (replace-regexp-in-string "" "\n" output))
+
 (defun go-run-test ()
   (interactive)
   (with-help-window "*go tests*"
-    (princ (shell-command-to-string go-test-last-test))))
+    (princ (concat go-test-last-test "\n" "\n"))
+    (princ (concat "-------------------------------------------------------" "\n\n"))
+    (princ (format-go-test-output (shell-command-to-string go-test-last-test)))))
 
 (defun go-run-current-test ()
   (interactive)
