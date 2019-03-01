@@ -12,7 +12,7 @@
     (next-buffer)
     (while
         (and
-         (string-match-p "^\*" (buffer-name))
+         (string-match-p "^\*|^magit:.*" (buffer-name))
          (not (equal bread-crumb (buffer-name))))
       (next-buffer))))
 
@@ -22,7 +22,7 @@
     (previous-buffer)
     (while
         (and
-         (string-match-p "^\*" (buffer-name))
+         (string-match-p "^\*|^magit:.*" (buffer-name))
          (not (equal bread-crumb (buffer-name))))
       (previous-buffer))))
 
