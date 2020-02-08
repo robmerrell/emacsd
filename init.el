@@ -43,7 +43,8 @@
 (setq ring-bell-function 'ignore)
 
 ;; font
-(set-frame-font "DejaVu Sans Mono-12")
+(add-to-list 'default-frame-alist '(font . "Monaco-12"))
+(set-face-attribute 'default t :font "Monaco-12")
 
 ;; show trailing whitespace
 (setq-default show-trailing-whitespace 1)
@@ -85,24 +86,35 @@
   (setq company-tooltip-flip-when-above t)
   :config
   (push 'company-files company-backends)
+  (define-key company-active-map (kbd "C-p") #'company-select-previous)
+  (define-key company-active-map (kbd "C-n") #'company-select-next)
   (global-company-mode))
-  
+
+;; yasnippet
+(use-package yasnippet
+  :ensure t
+  :diminish yas-minor-mode
+  :config
+  (add-to-list 'yas-snippet-dirs "~/.emacs.d/yasnippet-snippets")
+  (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
+  (yas-global-mode)
+  (global-set-key (kbd "C-s") 'company-yasnippet))
+
 
 ;; which key popup
 (use-package which-key
   :ensure t
   :config
+  (setq which-key-add-column-padding 8)
   (which-key-add-key-based-replacements
-    "<SPC>c" "comments"
-    "<SPC>d" "documentation"
-    "<SPC>e" "errors"
-    "<SPC>f" "files"
-    "<SPC>g" "goto"
-    "<SPC>m" "music"
-    "<SPC>p" "project"
-    "<SPC>s" "search"
-    "<SPC>t" "tests"
-    "<SPC>v" "version control")
+    "<SPC>b" "Buffers"
+    "<SPC>c" "Code"
+    "<SPC>cq" "Query"
+    "<SPC>f" "Files"
+    "<SPC>g" "Git"
+    "<SPC>m" "Music"
+    "<SPC>p" "Project"
+    "<SPC>w" "Window")
   :init
   (which-key-mode))
 
@@ -113,20 +125,35 @@
   (general-create-definer my-leader-def :prefix "SPC")
   (general-define-key :states 'insert "C-p" 'company-complete)
 
-  ;; moving between buffers
   (my-leader-def
     :states '(normal)
-    "l" 'next-code-buffer
-    "h" 'previous-code-buffer
+    ;; buffers
+    "bn" '(next-code-buffer :which-key "Next Code Buffer")
+    "bp" '(previous-code-buffer :which-key "Previous Code Buffer")
+    "bl" '(buffers :which-key "Buffer List")
+    "bs" '((lambda () (interactive)(switch-to-buffer "*scratch*")) :which-key "Open Scratch")
 
-    "ff" 'find-file
-    "fn" 'new-empty-buffer
+    ;; files
+    "ff" '(find-file :which-key "Find file")
+    "fn" '(new-empty-buffer :which-key "New Empty Buffer")
 
-    "sc" 'evil-ex-nohighlight)
+    ;; highlighting
+    "<SPC>" '(evil-ex-nohighlight :which-key "Remove Highlight")
+
+    ;; window movement
+    "wl" '(evil-window-right :which-key "Select Right Window")
+    "wh" '(evil-window-left :which-key "Select Left Window")
+    "wj" '(evil-window-down :which-key "Select Window Below")
+    "wk" '(evil-window-up :which-key "Select Window Above")
+
+    ;; window resizing
+    "wx" '(evil-window-increase-width :which-key "Increase Width")
+    "wy" '(evil-window-increase-height :which-key "Increase Height")
+    "wb" '(balance-windows :which-key "Balance Windows"))
 
   (my-leader-def
     :states '(visual)
-    "ir" 'indent-region))
+    "ci" '(indent-region :which-key "Indent Region")))
 
 ;; Avy
 (use-package avy
@@ -134,7 +161,7 @@
   :general
   (my-leader-def
     :states '(normal)
-    "gc" 'avy-goto-char))
+    "j" '(avy-goto-char :which-key "Jump To Character")))
 
 ;; Ivy
 (use-package ivy
@@ -142,23 +169,15 @@
   :diminish ivy-mode
   :config
   (ivy-mode 1))
-  
 
-;; window switching
-(use-package window-numbering
+(use-package ivy-posframe
   :ensure t
-  :init
-  (window-numbering-mode t)
-  :general
-  (my-leader-def
-    :states '(normal)
-    "0" 'select-window-0
-    "1" 'select-window-1
-    "2" 'select-window-2
-    "3" 'select-window-3
-    "4" 'select-window-4))
+  :diminish ivy-postframe-mode
+  :config
+  (setq ivy-posframe-parameters '((internal-border-width . 10)))
+  (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-top-center)))
+  (ivy-posframe-mode 1))
 
-(use-package magit :ensure t)
 
 ;; Evil mode
 (use-package evil
@@ -179,7 +198,7 @@
     :general
     (my-leader-def
       :states '(normal)
-      "vs" 'magit-status))
+      "gs" '(magit-status :which-key "Status")))
 
   ;; comment toggling
   (use-package evil-nerd-commenter
@@ -187,7 +206,7 @@
     :general
     (my-leader-def
       :states '(normal visual)
-      "cl" 'evilnc-comment-or-uncomment-lines))
+      "cl" '(evilnc-comment-or-uncomment-lines :which-key "Toggle Comments")))
 
   ;; surround
   (use-package evil-surround
@@ -198,11 +217,13 @@
 (use-package all-the-icons :ensure t)
 
 ;; theme
-(use-package nord-theme
+(use-package doom-themes
   :ensure t
-  :init
-  (setq nord-comment-brightness 15)
-  (load-theme 'nord t))
+  :config
+  (setq doom-themes-enable-bold t
+        doom-themes-enable-italic t)
+  (load-theme 'doom-palenight t)
+  (doom-themes-org-config))
 
 ;; smartparens
 (use-package smartparens
@@ -229,18 +250,18 @@
 (use-package doom-modeline
       :ensure t
       :defer t
-      :hook (after-init . doom-modeline-init))
+      :hook (after-init . doom-modeline-mode))
 
 ;; music
 (use-package my-music
   :general
   (my-leader-def
     :states '(normal)
-    "mc" 'itunes-now-playing
-    "mp" 'itunes-play
-    "ms" 'itunes-pause
-    "mn" 'itunes-next
-    "mr" 'itunes-previous))
+    "mi" '(itunes-now-playing :which-key "Song Info")
+    "mr" '(itunes-play :which-key "Play")
+    "ms" '(itunes-pause :which-key "Pause")
+    "mn" '(itunes-next :which-key "Play Next")
+    "mp" '(itunes-previous :which-key "Play Previous")))
 
 ;; rainbow delimiters
 (use-package rainbow-delimiters
@@ -254,9 +275,7 @@
   :general
   (my-leader-def
     :states '(normal)
-    "el" 'list-flycheck-errors
-    "en" 'flycheck-next-error
-    "ep" 'flycheck-previous-error)
+    "ce" '(list-flycheck-errors :which-key "Show Errors"))
   :init (global-flycheck-mode))
 
 ;; projectile
@@ -265,11 +284,11 @@
   :general
   (my-leader-def
     :states '(normal)
-    "pf" 'projectile-find-file
-    "pb" 'projectile-switch-to-buffer
-    "pr" 'projectile-switch-project
-    "ps" 'projectile-ag
-    "pi" 'projectile-invalidate-cache)
+    "pf" '(projectile-find-file :which-key "Find Project File")
+    "pb" '(projectile-switch-to-buffer :which-key "Find Project Buffer")
+    "pr" '(projectile-switch-project :which-key "Switch To Project")
+    "ps" '(projectile-ag :which-key "Search Project")
+    "pi" '(projectile-invalidate-cache :which-key "Invalidate Cache"))
   :config
   (progn
     (setq projectile-completion-system 'ivy)
@@ -283,13 +302,32 @@
 
 ;; shackle
 (use-package shackle
+  :ensure t
   :config
   (shackle-mode 1)
   (setq shackle-rules
-	`(("*go tests*" :align below :size 25 :select t)
+	`(("*Flycheck errors*" :regexp t :align below :size 8 :select t)
+          ("*go tests*" :align below :size 25 :select t)
           ("*godoc.*" :regexp t :align below :size 25 :select t)
 	  ("*Racer Help*" :align below :size 25 :select t)
           ("*rust tests*" :align below :size 25 :select t))))
+
+
+;; eglot
+(use-package eglot
+  :ensure t
+  :config
+  (setq eglot-ignored-server-capabilites '(:documentHighlightProvider))
+  :general
+  (my-leader-def
+    :states '(normal)
+    "ca" '(eglot-code-actions :which-key "Code Actions")
+    "cd" '(xref-find-definitions :which-key "Jump To Definition")
+    "cn" '(eglot-rename :which-key "Rename")
+    "cr" '(xref-find-references :which-key "Find References"))
+  :hook
+  ((go-mode . eglot-ensure)
+   (elisp-mode . eglot-ensure)))
 
 
 ;;
@@ -300,12 +338,30 @@
 (use-package go-mode
   :ensure t
   :mode "\\.go\\'"
+  :config
+  (use-package company-go
+    :ensure t
+    :defer t
+    :config
+    (setq company-go-show-annotation t)
+    :init
+    (with-eval-after-load 'company
+      (add-to-list 'company-backends 'company-go)))
+
+  (use-package go-eldoc
+    :ensure t
+    :general
+    (my-leader-def
+      :states '(normal)
+      "ck" '(godoc-at-point :which-key "Documentation"))
+    :config
+    (add-hook 'go-mode-hook 'go-eldoc-setup))
+
   :general
   (my-leader-def go-mode-map
     :states '(normal)
-    "gd" 'godef-jump
-    "tc" 'go-run-current-test
-    "tp" 'go-run-previous-test)
+    "cc" '(go-run-current-test :which-key "Run Current Test")
+    "cp" '(go-run-previous-test :which-key "Run Previous Test"))
   :init
   (add-hook 'go-mode-hook (lambda () (setq tab-width 4)))
   (add-hook 'go-mode-hook 'go-eldoc-setup)
@@ -313,54 +369,3 @@
   (setq gofmt-show-errors nil)
   (add-hook 'before-save-hook 'gofmt-before-save))
 
-(use-package company-go
-  :ensure t
-  :defer t
-  :config
-  (setq company-go-show-annotation t)
-  :init
-  (with-eval-after-load 'company
-    (add-to-list 'company-backends 'company-go)))
-
-(use-package go-guru :ensure t)
-
-(use-package go-eldoc
-  :ensure t
-  :general
-  (my-leader-def
-    :states '(normal)
-    "dp" 'godoc-at-point)
-  :config
-  (add-hook 'go-mode-hook 'go-eldoc-setup))
-
-
-;;
-;; Rust
-;;
-
-(use-package my-rust)
-(use-package rust-mode
-  :ensure t
-  :config
-  (progn
-    (use-package racer
-      :ensure t
-      :mode ("\\.rs\\'" . rust-mode)
-      :general
-      (my-leader-def rust-mode-map
-        :states '(normal)
-        "dp" 'racer-describe
-        "gd" 'racer-find-definition
-        "tc" 'rust-run-current-test
-        "tp" 'rust-run-previous-test)
-      :config
-      (setq racer-rust-src-path "~/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/src/rust/src"))
-    (use-package flycheck-rust
-      :ensure t
-      :config
-      (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
-    (add-hook 'rust-mode-hook #'racer-mode)
-    (add-hook 'racer-mode-hook #'eldoc-mode)
-    (add-hook 'racer-mode-hook #'company-mode)
-    (add-hook 'rust-mode-hook #'electric-pair-mode)
-    (setq rust-format-on-save t)))
