@@ -113,6 +113,7 @@
     "<SPC>g" "Git"
     "<SPC>m" "Music"
     "<SPC>p" "Project"
+    "<SPC>t" "Treemacs"
     "<SPC>w" "Window")
   :init
   (which-key-mode))
@@ -314,6 +315,19 @@
 	  ("*Racer Help*" :align below :size 25 :select t)
           ("*rust tests*" :align below :size 25 :select t))))
 
+;; treemacs
+(use-package treemacs
+  :ensure t
+  :general
+  (my-leader-def
+    :states '(normal)
+    "tt" '(treemacs :which-key "Treemacs")))
+
+(use-package treemacs-evil
+  :ensure t)
+
+(use-package treemacs-projectile
+  :ensure t)
 
 ;; lsp-mode
 (use-package lsp-mode
@@ -324,7 +338,8 @@
     "ck" '(toggle-lsp-ui-help :which-key "Help At Point")
     "cd" '(lsp-find-definition :which-key "Jump to Definition")
     "cn" '(lsp-rename :which-key "Rename")
-    "cr" '(lsp-find-references :which-key "Find References"))
+    "cr" '(lsp-find-references :which-key "Find References")
+    "ts" '(lsp-treemacs-symbols :which-key "Symbols"))
 
   :config
   (setq lsp-enable-links nil)
@@ -350,9 +365,9 @@
   (push 'company-lsp company-backends)
   :commands company-lsp)
 
-;; (use-package lsp-treemacs
-;;   :ensure t
-;;   :commands lsp-treemacs-errors-list)
+(use-package lsp-treemacs
+  :ensure t
+  :commands lsp-treemacs-errors-list)
 
 ;;
 ;; Go
