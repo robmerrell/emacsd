@@ -29,7 +29,6 @@
   (exec-path-from-shell-initialize))
 
 ;; turn off the tool bar, scroll bar and menu bar
-(menu-bar-mode 0)
 (tool-bar-mode 0)
 (scroll-bar-mode 0)
 
@@ -127,10 +126,13 @@
 
   (my-leader-def
     :states '(normal)
+    ;; system
+    "e" '(eval-last-sexp :which-key "Eval Last s-exp")
+
     ;; buffers
     "bn" '(next-code-buffer :which-key "Next Code Buffer")
     "bp" '(previous-code-buffer :which-key "Previous Code Buffer")
-    "bl" '(buffers :which-key "Buffer List")
+    "bl" '(list-buffers :which-key "Buffer List")
     "bs" '((lambda () (interactive)(switch-to-buffer "*scratch*")) :which-key "Open Scratch")
 
     ;; files
@@ -313,22 +315,44 @@
           ("*rust tests*" :align below :size 25 :select t))))
 
 
-;; eglot
-(use-package eglot
+;; lsp-mode
+(use-package lsp-mode
   :ensure t
-  :config
-  (setq eglot-ignored-server-capabilites '(:documentHighlightProvider))
   :general
   (my-leader-def
     :states '(normal)
-    "ca" '(eglot-code-actions :which-key "Code Actions")
-    "cd" '(xref-find-definitions :which-key "Jump To Definition")
-    "cn" '(eglot-rename :which-key "Rename")
-    "cr" '(xref-find-references :which-key "Find References"))
-  :hook
-  ((go-mode . eglot-ensure)
-   (elisp-mode . eglot-ensure)))
+    "ck" '(toggle-lsp-ui-help :which-key "Help At Point")
+    "cd" '(lsp-find-definition :which-key "Jump to Definition")
+    "cn" '(lsp-rename :which-key "Rename")
+    "cr" '(lsp-find-references :which-key "Find References"))
 
+  :config
+  (setq lsp-enable-links nil)
+  (setq lsp-enable-symbol-highlighting nil)
+  (add-to-list 'lsp-file-watch-ignored "vendor$")
+
+  (setq lsp-ui-doc-enable nil)
+  (setq lsp-ui-sideline-enable t)
+  (setq lsp-ui-sideline-ignore-duplicate t)
+  (setq lsp-ui-doc-header t)
+  (setq lsp-ui-doc-include-signature t)
+  (setq lsp-ui-doc-position 'bottom)
+  :hook ((go-mode . lsp))
+  :commands lsp)
+
+(use-package lsp-ui
+  :ensure t
+  :commands lsp-ui-mode)
+
+(use-package company-lsp
+  :ensure t
+  :config
+  (push 'company-lsp company-backends)
+  :commands company-lsp)
+
+;; (use-package lsp-treemacs
+;;   :ensure t
+;;   :commands lsp-treemacs-errors-list)
 
 ;;
 ;; Go
@@ -347,15 +371,6 @@
     :init
     (with-eval-after-load 'company
       (add-to-list 'company-backends 'company-go)))
-
-  (use-package go-eldoc
-    :ensure t
-    :general
-    (my-leader-def
-      :states '(normal)
-      "ck" '(godoc-at-point :which-key "Documentation"))
-    :config
-    (add-hook 'go-mode-hook 'go-eldoc-setup))
 
   :general
   (my-leader-def go-mode-map
