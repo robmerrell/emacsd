@@ -282,6 +282,10 @@
     "ce" '(list-flycheck-errors :which-key "Show Errors"))
   :init (global-flycheck-mode))
 
+(use-package flycheck-golangci-lint
+  :ensure t
+  :hook (go-mode . flycheck-golangci-lint-setup))
+
 ;; projectile
 (use-package projectile
   :ensure t
@@ -345,6 +349,7 @@
   :config
   (setq lsp-enable-links nil)
   (setq lsp-enable-symbol-highlighting nil)
+  (setq lsp-prefer-flymake :none)
   (add-to-list 'lsp-file-watch-ignored "vendor$")
 
   (setq lsp-ui-doc-enable nil)
@@ -395,7 +400,6 @@
     "cp" '(go-run-previous-test :which-key "Run Previous Test"))
   :init
   (add-hook 'go-mode-hook (lambda () (setq tab-width 4)))
-  (add-hook 'go-mode-hook 'go-eldoc-setup)
   (setq gofmt-command "goimports")
   (setq gofmt-show-errors nil)
   (add-hook 'before-save-hook 'gofmt-before-save))
