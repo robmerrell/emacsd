@@ -104,7 +104,8 @@
 (use-package which-key
   :ensure t
   :config
-  (setq which-key-add-column-padding 8)
+  ;; (setq which-key-add-column-padding 8)
+  (which-key-setup-side-window-right)
   (which-key-add-key-based-replacements
     "<SPC>b" "Buffers"
     "<SPC>c" "Code"
