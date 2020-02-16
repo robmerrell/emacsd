@@ -1,3 +1,7 @@
+;;; init.el --- Emacs config entry point
+;;; Commentary:
+;;; Code:
+
 ;;
 ;; Package Management
 ;;
@@ -29,6 +33,7 @@
   (exec-path-from-shell-initialize))
 
 ;; turn off the tool bar, scroll bar and menu bar
+(menu-bar-mode 1)
 (tool-bar-mode 0)
 (scroll-bar-mode 0)
 
@@ -105,11 +110,10 @@
   :ensure t
   :config
   ;; (setq which-key-add-column-padding 8)
-  (which-key-setup-side-window-right)
+  (which-key-setup-side-window-bottom)
   (which-key-add-key-based-replacements
     "<SPC>b" "Buffers"
     "<SPC>c" "Code"
-    "<SPC>cq" "Query"
     "<SPC>f" "Files"
     "<SPC>g" "Git"
     "<SPC>m" "Music"
@@ -128,8 +132,7 @@
 
   (my-leader-def
     :states '(normal)
-    ;; system
-    "e" '(eval-last-sexp :which-key "Eval Last s-exp")
+    ":" '(execute-extended-command :which-key "M-x")
 
     ;; buffers
     "bn" '(next-code-buffer :which-key "Next Code Buffer")
@@ -226,8 +229,11 @@
   :config
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t)
-  (load-theme 'doom-palenight t)
+  (load-theme 'doom-city-lights t)
   (doom-themes-org-config))
+(set-face-background 'vertical-border "black")
+(set-face-foreground 'vertical-border (face-background 'vertical-border))
+
 
 ;; smartparens
 (use-package smartparens
@@ -240,11 +246,9 @@
 
   (setq
    smartparens-strict-mode t
-   sp-autoinsert-if-followed-by-word t
    sp-autoskip-closing-pair 'always
    sp-base-key-bindings 'paredit
    sp-hybrid-kill-entire-symbol nil
-   sp-autoescape-string-quote nil
    sp-highlight-pair-overlay nil
    sp-highlight-wrap-overlay nil
    sp-highlight-wrap-tag-overlay nil))
@@ -326,6 +330,7 @@
   :general
   (my-leader-def
     :states '(normal)
+    "tc" '(treemacs-quit :which-key "Close")
     "tt" '(treemacs :which-key "Treemacs")))
 
 (use-package treemacs-evil
@@ -335,6 +340,7 @@
   :ensure t)
 
 ;; lsp-mode
+(use-package my-lsp)
 (use-package lsp-mode
   :ensure t
   :general
@@ -343,7 +349,7 @@
     "ck" '(toggle-lsp-ui-help :which-key "Help At Point")
     "cd" '(lsp-find-definition :which-key "Jump to Definition")
     "cn" '(lsp-rename :which-key "Rename")
-    "cr" '(lsp-find-references :which-key "Find References")
+    "cf" '(lsp-find-references :which-key "Find References")
     "ts" '(lsp-treemacs-symbols :which-key "Symbols"))
 
   :config
@@ -358,7 +364,8 @@
   (setq lsp-ui-doc-header t)
   (setq lsp-ui-doc-include-signature t)
   (setq lsp-ui-doc-position 'bottom)
-  :hook ((go-mode . lsp))
+  :hook ((go-mode . lsp)
+         (rust-mode . lsp))
   :commands lsp)
 
 (use-package lsp-ui
@@ -374,6 +381,20 @@
 (use-package lsp-treemacs
   :ensure t
   :commands lsp-treemacs-errors-list)
+
+;;
+;; Emacs Lisp
+;;
+(use-package lisp-mode
+  :ensure nil
+  :general
+  (my-leader-def emacs-lisp-mode-map
+    :states '(normal)
+    "ce" '(eval-last-sexp :which-key "Eval last s-expr"))
+
+  (my-leader-def emacs-lisp-mode-map
+    :states '(visual)
+    "ce" '(eval-region :which-key "Eval region")))
 
 ;;
 ;; Go
@@ -404,3 +425,46 @@
   (setq gofmt-show-errors nil)
   (add-hook 'before-save-hook 'gofmt-before-save))
 
+;;
+;; Rust
+;;
+(use-package my-rust)
+(use-package rust-mode
+  :ensure t
+  :config
+  (progn
+    (use-package racer
+      :ensure t
+      :mode ("\\.rs\\'" . rust-mode)
+      :general
+      (my-leader-def rust-mode-map
+        :states '(normal)
+        "dp" 'racer-describe
+        "gd" 'racer-find-definition
+        "tc" 'rust-run-current-test
+        "tp" 'rust-run-previous-test)
+      :config
+      (setq racer-rust-src-path "~/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/src/rust/src"))
+    (use-package flycheck-rust
+      :ensure t
+      :config
+      (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
+    (add-hook 'rust-mode-hook #'racer-mode)
+    (add-hook 'racer-mode-hook #'eldoc-mode)
+    (add-hook 'racer-mode-hook #'company-mode)
+    (add-hook 'rust-mode-hook #'electric-pair-mode)
+    (setq rust-format-on-save t)))
+
+
+;;
+;; Pony
+;;
+
+(use-package ponylang-mode
+  :ensure t
+  :mode "\\.pony\\'"
+  :init
+  (add-hook 'ponylang-mode-hook (lambda () (setq tab-width 2))))
+
+(provide 'init.el)
+;;; init.el ends here
