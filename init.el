@@ -117,6 +117,7 @@
     "<SPC>f" "Files"
     "<SPC>g" "Git"
     "<SPC>m" "Music"
+    "<SPC>o" "Org"
     "<SPC>p" "Project"
     "<SPC>t" "Treemacs"
     "<SPC>w" "Window")
@@ -138,7 +139,8 @@
     "bn" '(next-code-buffer :which-key "Next Code Buffer")
     "bp" '(previous-code-buffer :which-key "Previous Code Buffer")
     "bl" '(list-buffers :which-key "Buffer List")
-    "bs" '((lambda () (interactive)(switch-to-buffer "*scratch*")) :which-key "Open Scratch")
+    "bs" '(ivy-switch-buffer :which-key "Switch Buffer")
+    "bc" '((lambda () (interactive)(switch-to-buffer "*scratch*")) :which-key "Open Scratch")
 
     ;; files
     "ff" '(find-file :which-key "Find file")
@@ -234,7 +236,6 @@
 (set-face-background 'vertical-border "black")
 (set-face-foreground 'vertical-border (face-background 'vertical-border))
 
-
 ;; smartparens
 (use-package smartparens
   :ensure t
@@ -308,6 +309,7 @@
     (setq projectile-enable-caching t)
     (setq projectile-indexing-method 'native)
     (add-to-list 'projectile-globally-ignored-directories "vendor")
+    (add-to-list 'projectile-globally-ignored-directories "target")
     (add-to-list 'projectile-globally-ignored-directories "elpa"))
   :config
   (projectile-mode))
@@ -383,6 +385,32 @@
   :commands lsp-treemacs-errors-list)
 
 ;;
+;; Org
+;;
+(use-package org
+  :general
+  (my-leader-def org-mode-map
+    :states '(normal)
+    "ot" '(org-todo :which-key "Toggle TODO")
+    "oa" '(org-agenda :which-key "Agenda")
+    "os" '(org-set-tags :which-key "Add Tag")
+    "oq" '(org-tags-view :which-key "Tag Search"))
+  :config
+  (use-package org-bullets
+    :ensure t
+    :config
+    (setq org-bullets-bullet-list '("⠕"))
+    (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+  (setq org-directory "~/iCloud/org")
+  (set-face-attribute 'org-level-1 nil :height 1.9)
+  (set-face-attribute 'org-level-2 nil :height 1.3)
+  (set-face-attribute 'org-level-3 nil :height 1.2)
+  (set-face-attribute 'org-level-4 nil :height 1.0)
+  (setq org-startup-folded nil)
+  (setq org-agenda-files (list org-directory)))
+
+
+;;
 ;; Emacs Lisp
 ;;
 (use-package lisp-mode
@@ -399,7 +427,6 @@
 ;;
 ;; Go
 ;;
-
 (use-package my-go)
 (use-package go-mode
   :ensure t
@@ -431,35 +458,25 @@
 (use-package my-rust)
 (use-package rust-mode
   :ensure t
+  :mode "\\.rs\\'"
   :config
-  (progn
-    (use-package racer
-      :ensure t
-      :mode ("\\.rs\\'" . rust-mode)
-      :general
-      (my-leader-def rust-mode-map
-        :states '(normal)
-        "dp" 'racer-describe
-        "gd" 'racer-find-definition
-        "tc" 'rust-run-current-test
-        "tp" 'rust-run-previous-test)
-      :config
-      (setq racer-rust-src-path "~/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/src/rust/src"))
-    (use-package flycheck-rust
-      :ensure t
-      :config
-      (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
-    (add-hook 'rust-mode-hook #'racer-mode)
-    (add-hook 'racer-mode-hook #'eldoc-mode)
-    (add-hook 'racer-mode-hook #'company-mode)
-    (add-hook 'rust-mode-hook #'electric-pair-mode)
-    (setq rust-format-on-save t)))
-
+  (use-package racer
+    :ensure t)
+  (use-package flycheck-rust
+    :ensure t
+    :config
+    (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
+  :general
+  (my-leader-def rust-mode-map
+    :states '(normal)
+    "cc" 'rust-run-current-test
+    "cp" 'rust-run-previous-test)
+  :init
+  (setq rust-format-on-save t))
 
 ;;
 ;; Pony
 ;;
-
 (use-package ponylang-mode
   :ensure t
   :mode "\\.pony\\'"
