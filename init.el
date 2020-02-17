@@ -321,6 +321,7 @@
   (shackle-mode 1)
   (setq shackle-rules
 	`(("*Flycheck errors*" :regexp t :align below :size 8 :select t)
+          ("*HTTP Response*" :align below :size 35 :noselect t)
           ("*go tests*" :align below :size 25 :select t)
           ("*godoc.*" :regexp t :align below :size 25 :select t)
 	  ("*Racer Help*" :align below :size 25 :select t)
@@ -384,9 +385,11 @@
   :ensure t
   :commands lsp-treemacs-errors-list)
 
-;;
+;; restclient-mode
+(use-package restclient
+  :ensure t)
+
 ;; Org
-;;
 (use-package org
   :general
   (my-leader-def org-mode-map
