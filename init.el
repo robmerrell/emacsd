@@ -308,10 +308,6 @@
     "ce" '(list-flycheck-errors :which-key "Show Errors"))
   :init (global-flycheck-mode))
 
-(use-package flycheck-golangci-lint
-  :ensure t
-  :hook (go-mode . flycheck-golangci-lint-setup))
-
 ;; projectile
 (use-package projectile
   :ensure t
