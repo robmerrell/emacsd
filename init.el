@@ -109,15 +109,15 @@
 (use-package which-key
   :ensure t
   :config
-  ;; (setq which-key-add-column-padding 8)
+  (setq which-key-add-column-padding 8)
   (which-key-setup-side-window-bottom)
   (which-key-add-key-based-replacements
+    "<SPC><SPC>" "Local Leader"
     "<SPC>b" "Buffers"
     "<SPC>c" "Code"
     "<SPC>f" "Files"
     "<SPC>g" "Git"
     "<SPC>m" "Music"
-    "<SPC>o" "Org"
     "<SPC>p" "Project"
     "<SPC>t" "Treemacs"
     "<SPC>w" "Window")
@@ -147,7 +147,10 @@
     "fn" '(new-empty-buffer :which-key "New Empty Buffer")
 
     ;; highlighting
-    "<SPC>" '(evil-ex-nohighlight :which-key "Remove Highlight")
+    "n" '(evil-ex-nohighlight :which-key "Remove Highlight")
+
+    ;; frame management
+    "wn" '(make-frame :which-key "New Host Window")
 
     ;; window movement
     "wl" '(evil-window-right :which-key "Select Right Window")
@@ -187,6 +190,18 @@
   (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-top-center)))
   (ivy-posframe-mode 1))
 
+;; window switching
+(use-package window-numbering
+  :ensure t
+  :init
+  (window-numbering-mode t)
+  :general
+  (my-leader-def
+    :states '(normal)
+    "w1" '(select-window-1 :which-key "Window 1")
+    "w2" '(select-window-2 :which-key "Window 2")
+    "w3" '(select-window-3 :which-key "Window 3")
+    "w4" '(select-window-4 :which-key "Window 4")))
 
 ;; Evil mode
 (use-package evil
@@ -199,6 +214,8 @@
   (setq evil-shift-round nil)
   (setq evil-want-C-u-scroll t)
   :config
+  (global-set-key (kbd "M-v") 'evil-paste-after)
+
   (evil-mode)
 
   ;; magit
@@ -207,6 +224,9 @@
     :general
     (my-leader-def
       :states '(normal)
+      "gr" '(vc-refresh-state :which-key "Refresh State")
+      "gb" '(magit-branch-and-checkout :which-key "Branch and Checkout")
+      "gc" '(magit-checkout :which-key "Checkout")
       "gs" '(magit-status :which-key "Status")))
 
   ;; comment toggling
@@ -232,6 +252,7 @@
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t)
   (load-theme 'doom-city-lights t)
+  (doom-themes-treemacs-config)
   (doom-themes-org-config))
 (set-face-background 'vertical-border "black")
 (set-face-foreground 'vertical-border (face-background 'vertical-border))
@@ -394,10 +415,10 @@
   :general
   (my-leader-def org-mode-map
     :states '(normal)
-    "ot" '(org-todo :which-key "Toggle TODO")
-    "oa" '(org-agenda :which-key "Agenda")
-    "os" '(org-set-tags :which-key "Add Tag")
-    "oq" '(org-tags-view :which-key "Tag Search"))
+    "<SPC>t" '(org-todo :which-key "Toggle TODO")
+    "<SPC>a" '(org-agenda :which-key "Agenda")
+    "<SPC>s" '(org-set-tags :which-key "Add Tag")
+    "<SPC>q" '(org-tags-view :which-key "Tag Search"))
   :config
   (use-package org-bullets
     :ensure t
