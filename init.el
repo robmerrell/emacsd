@@ -214,7 +214,7 @@
   (setq evil-shift-round nil)
   (setq evil-want-C-u-scroll t)
   :config
-  (global-set-key (kbd "M-v") 'evil-paste-after)
+  (global-set-key (kbd "M-v") 'evil-paste-before)
 
   (evil-mode)
 
@@ -429,7 +429,6 @@
   (setq org-startup-folded nil)
   (setq org-agenda-files (list org-directory)))
 
-
 ;;
 ;; Emacs Lisp
 ;;
@@ -460,6 +459,12 @@
     :init
     (with-eval-after-load 'company
       (add-to-list 'company-backends 'company-go)))
+
+  (use-package flycheck-golangci-lint
+    :ensure t
+    :hook (go-mode . flycheck-golangci-lint-setup)
+    :config
+    (setq flycheck-golangci-lint-enable-linters '("deadcode" "errcheck" "gosimple" "govet" "ineffassign" "staticcheck" "structcheck" "typecheck" "varcheck")))
 
   :general
   (my-leader-def go-mode-map
