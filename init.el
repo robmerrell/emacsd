@@ -71,6 +71,9 @@
 ;; Add to load-path
 (add-to-list 'load-path "~/.emacs.d/lisp")
 
+(setq gc-cons-threshold 100000000)
+(setq read-process-output-max (* 1024 1024))
+
 
 ;;
 ;; Package configs
@@ -84,7 +87,7 @@
   :init
   (setq company-selection-wrap-around t)
   (setq company-minimum-prefix-length 2)
-  (setq company-idle-delay 0.5)
+  (setq company-idle-delay 0.0)
   (setq company-tooltip-limit 10)
   (setq company-minimum-prefix-length 2)
   (setq company-tooltip-flip-when-above t)
@@ -316,9 +319,11 @@
     :states '(normal)
     "pf" '(projectile-find-file :which-key "Find Project File")
     "pb" '(projectile-switch-to-buffer :which-key "Find Project Buffer")
-    "pr" '(projectile-switch-project :which-key "Switch To Project")
+    "pw" '(projectile-switch-project :which-key "Switch To Project")
     "ps" '(projectile-ag :which-key "Search Project")
-    "pi" '(projectile-invalidate-cache :which-key "Invalidate Cache"))
+    "pi" '(projectile-invalidate-cache :which-key "Invalidate Cache")
+    "pt" '(projectile-find-tag :which-key "Find Tag")
+    "pr" '(projectile-regenerate-tags :which-key "Regenerate Tags"))
   :config
   (progn
     (setq projectile-completion-system 'ivy)
@@ -340,6 +345,7 @@
 	`(("*Flycheck errors*" :regexp t :align below :size 8 :select t)
           ("*HTTP Response*" :align below :size 35 :noselect t)
           ("*go tests*" :align below :size 25 :select t)
+          ("*lsp-help*" :regexp t :align below :size 25 :select t)
           ("*godoc.*" :regexp t :align below :size 25 :select t)
 	  ("*Racer Help*" :align below :size 25 :select t)
           ("*rust tests*" :align below :size 25 :select t))))
@@ -366,31 +372,20 @@
   :general
   (my-leader-def
     :states '(normal)
-    "ck" '(toggle-lsp-ui-help :which-key "Help At Point")
+    "ck" '(lsp-describe-thing-at-point :which-key "Help At Point")
     "cd" '(lsp-find-definition :which-key "Jump to Definition")
     "cn" '(lsp-rename :which-key "Rename")
     "cf" '(lsp-find-references :which-key "Find References")
+    "cs" '(lsp-workspace-restart :which-key "Restart LSP Server")
     "ts" '(lsp-treemacs-symbols :which-key "Symbols"))
 
   :config
   (setq lsp-enable-links nil)
   (setq lsp-enable-symbol-highlighting nil)
-  (setq lsp-prefer-flymake :none)
   (add-to-list 'lsp-file-watch-ignored "vendor$")
-
-  (setq lsp-ui-doc-enable nil)
-  (setq lsp-ui-sideline-enable t)
-  (setq lsp-ui-sideline-ignore-duplicate t)
-  (setq lsp-ui-doc-header t)
-  (setq lsp-ui-doc-include-signature t)
-  (setq lsp-ui-doc-position 'bottom)
   :hook ((go-mode . lsp)
          (rust-mode . lsp))
   :commands lsp)
-
-(use-package lsp-ui
-  :ensure t
-  :commands lsp-ui-mode)
 
 (use-package company-lsp
   :ensure t
@@ -460,11 +455,11 @@
     (with-eval-after-load 'company
       (add-to-list 'company-backends 'company-go)))
 
-  (use-package flycheck-golangci-lint
-    :ensure t
-    :hook (go-mode . flycheck-golangci-lint-setup)
-    :config
-    (setq flycheck-golangci-lint-enable-linters '("deadcode" "errcheck" "gosimple" "govet" "ineffassign" "staticcheck" "structcheck" "typecheck" "varcheck")))
+  ;; (use-package flycheck-golangci-lint
+  ;;   :ensure t
+  ;;   :hook (go-mode . flycheck-golangci-lint-setup)
+  ;;   :config
+  ;;   (setq flycheck-golangci-lint-enable-linters '("deadcode" "gofmt" "gosimple" "govet" "ineffassign" "structcheck" "unused" "varcheck")))
 
   :general
   (my-leader-def go-mode-map
@@ -507,6 +502,10 @@
   :mode "\\.pony\\'"
   :init
   (add-hook 'ponylang-mode-hook (lambda () (setq tab-width 2))))
+
+;;
+;; Elixir
+;;
 
 (provide 'init.el)
 ;;; init.el ends here
