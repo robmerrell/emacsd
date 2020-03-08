@@ -1,7 +1,7 @@
 (defvar go-test-last-test "")
 
 (defun go-test-generate-test-command (test-name)
-  (concat "/usr/local/bin/go test -v -timeout 30s " (go-current-buffer-package) " -run " test-name "$"))
+  (concat "/usr/local/bin/go test -v -timeout 30s " (go-current-buffer-package) " -run " test-name "\\$"))
 
 (defun go-current-buffer-package ()
   (replace-regexp-in-string

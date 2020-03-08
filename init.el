@@ -330,6 +330,10 @@
     (setq projectile-completion-system 'default)
     (setq projectile-enable-caching t)
     (setq projectile-indexing-method 'native)
+    (add-to-list 'projectile-globally-ignored-directories "node_modules")
+    (add-to-list 'projectile-globally-ignored-directories "assets/node_modules")
+    (add-to-list 'projectile-globally-ignored-directories "_build")
+    (add-to-list 'projectile-globally-ignored-directories "deps")
     (add-to-list 'projectile-globally-ignored-directories "vendor")
     (add-to-list 'projectile-globally-ignored-directories "target")
     (add-to-list 'projectile-globally-ignored-directories "elpa"))
@@ -345,6 +349,7 @@
 	`(("*Flycheck errors*" :regexp t :align below :size 8 :select t)
           ("*HTTP Response*" :align below :size 35 :noselect t)
           ("*go tests*" :align below :size 25 :select t)
+          ("*compilation*" :align below :size 25 :select t)
           ("*lsp-help*" :regexp t :align below :size 25 :select t)
           ("*godoc.*" :regexp t :align below :size 25 :select t)
 	  ("*Racer Help*" :align below :size 25 :select t)
@@ -450,6 +455,9 @@
     :ensure t
     :defer t
     :config
+    (use-package go-playground
+      :ensure t)
+
     (setq company-go-show-annotation t)
     :init
     (with-eval-after-load 'company
@@ -464,6 +472,8 @@
   :general
   (my-leader-def go-mode-map
     :states '(normal)
+    "<SPC>e" '(go-playground-exec :which-key "Playground Exec")
+    "<SPC>p" '(go-playground :which-key "Go Playground")
     "cc" '(go-run-current-test :which-key "Run Current Test")
     "cp" '(go-run-previous-test :which-key "Run Previous Test"))
   :init
@@ -489,8 +499,8 @@
   :general
   (my-leader-def rust-mode-map
     :states '(normal)
-    "cc" 'rust-run-current-test
-    "cp" 'rust-run-previous-test)
+    "cc" '(rust-run-current-test :which-key "Run Current Test")
+    "cp" '(rust-run-previous-test :which-key "Run Last Test"))
   :init
   (setq rust-format-on-save t))
 
@@ -506,6 +516,19 @@
 ;;
 ;; Elixir
 ;;
+(use-package elixir-mode
+  :ensure t
+  :mode ("\\.ex\\'" "\\.exs\\'" "mix\\.lock\\'")
+  :config
+  (use-package exunit
+    :ensure t)
+  :general
+  (my-leader-def elixir-mode-map
+    :states '(normal)
+    "cc" '(exunit-verify-single :which-key "Run Current Test")
+    "cp" '(exunit-rerun :which-key "Run Previous Test"))
+  :init
+  (add-hook 'elixir-mode-hook (lambda () (setq tab-width 2))))
 
 (provide 'init.el)
 ;;; init.el ends here
