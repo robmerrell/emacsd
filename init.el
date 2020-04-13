@@ -308,7 +308,8 @@
   :general
   (my-leader-def
     :states '(normal)
-    "ce" '(list-flycheck-errors :which-key "Show Errors"))
+    "ce" '(list-flycheck-errors :which-key "Show Errors")
+    "cx" '(flycheck-next-error :which-key "Next Error"))
   :init (global-flycheck-mode))
 
 ;; projectile
@@ -350,7 +351,7 @@
           ("*HTTP Response*" :align below :size 35 :noselect t)
           ("*go tests*" :align below :size 25 :select t)
           ("*compilation*" :align below :size 25 :select t)
-          ("*lsp-help*" :regexp t :align below :size 25 :select t)
+          ("*lsp-help*" :regexp t :align below :size 8 :select t)
           ("*godoc.*" :regexp t :align below :size 25 :select t)
 	  ("*Racer Help*" :align below :size 25 :select t)
           ("*rust tests*" :align below :size 25 :select t))))
@@ -385,6 +386,7 @@
     "ts" '(lsp-treemacs-symbols :which-key "Symbols"))
 
   :config
+  (setq lsp-signature-auto-activate nil)
   (setq lsp-enable-links nil)
   (setq lsp-enable-symbol-highlighting nil)
   (add-to-list 'lsp-file-watch-ignored "vendor$")
@@ -463,15 +465,10 @@
     (with-eval-after-load 'company
       (add-to-list 'company-backends 'company-go)))
 
-  ;; (use-package flycheck-golangci-lint
-  ;;   :ensure t
-  ;;   :hook (go-mode . flycheck-golangci-lint-setup)
-  ;;   :config
-  ;;   (setq flycheck-golangci-lint-enable-linters '("deadcode" "gofmt" "gosimple" "govet" "ineffassign" "structcheck" "unused" "varcheck")))
-
   :general
   (my-leader-def go-mode-map
     :states '(normal)
+    "<SPC>d" '(godoc-at-point :which-key "GoDoc At Point")
     "<SPC>e" '(go-playground-exec :which-key "Playground Exec")
     "<SPC>p" '(go-playground :which-key "Go Playground")
     "cc" '(go-run-current-test :which-key "Run Current Test")
@@ -529,6 +526,21 @@
     "cp" '(exunit-rerun :which-key "Run Previous Test"))
   :init
   (add-hook 'elixir-mode-hook (lambda () (setq tab-width 2))))
+
+;;
+;; dotenv
+;;
+(use-package dotenv-mode
+  :ensure t)
+
+;;
+;; SQL
+;;
+(use-package sql-indent
+  :ensure t
+  :custom
+  (sql-indent-offset 2))
+
 
 (provide 'init.el)
 ;;; init.el ends here
