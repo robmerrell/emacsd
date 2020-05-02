@@ -102,7 +102,6 @@
   :ensure t
   :diminish yas-minor-mode
   :config
-  (add-to-list 'yas-snippet-dirs "~/.emacs.d/yasnippet-snippets")
   (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
   (yas-global-mode)
   (global-set-key (kbd "C-s") 'company-yasnippet))
@@ -330,7 +329,8 @@
     (setq projectile-completion-system 'ivy)
     (setq projectile-completion-system 'default)
     (setq projectile-enable-caching t)
-    (setq projectile-indexing-method 'native)
+    (setq projectile-indexing-method 'hybrid)
+    (setq projectile-sort-order 'recently-active)
     (add-to-list 'projectile-globally-ignored-directories "node_modules")
     (add-to-list 'projectile-globally-ignored-directories "assets/node_modules")
     (add-to-list 'projectile-globally-ignored-directories "_build")
@@ -386,6 +386,7 @@
     "ts" '(lsp-treemacs-symbols :which-key "Symbols"))
 
   :config
+  (setq lsp-diagnostic-package :none)
   (setq lsp-signature-auto-activate nil)
   (setq lsp-enable-links nil)
   (setq lsp-enable-symbol-highlighting nil)
@@ -404,9 +405,22 @@
   :ensure t
   :commands lsp-treemacs-errors-list)
 
+;; DAP
+(use-package dap-mode
+  :ensure t
+  :config
+  (dap-mode 1)
+  (require 'dap-go)
+  (use-package dap-ui
+    :ensure nil
+    :config
+    (dap-ui-mode 1)))
+
 ;; restclient-mode
 (use-package restclient
-  :ensure t)
+  :ensure t
+  :mode "\\.rest\\'"
+  :commands restclient-mode)
 
 ;; Org
 (use-package org
@@ -526,6 +540,34 @@
     "cp" '(exunit-rerun :which-key "Run Previous Test"))
   :init
   (add-hook 'elixir-mode-hook (lambda () (setq tab-width 2))))
+
+;;
+;; Clojure
+;;
+(use-package cider
+  :ensure t
+  :commands (cider cider-connect cider-jack-in)
+  :init
+  (add-hook 'cider-mode-hook 'company-mode))
+
+(use-package paredit
+  :ensure t
+  :init
+  (add-hook 'clojure-mode-hook 'paredit-mode))
+
+(use-package clojure-mode
+  :ensure t
+  :mode ("\\.clj\\'")
+
+  :general
+  (my-leader-def clojure-mode-map
+    :states '(normal)
+    "<SPC>e" '(cider-eval-last-sexp :which-key "Eval last sexp")
+    "<SPC>E" '(cider-eval-last-sexp-to-repl :which-key "Eval last sexp to REPL")
+    "<SPC>c" '(cider-eval-defun-at-point :which-key "Eval defun at point"))
+  :config
+  (general-define-key :states 'normal "C-k" 'paredit-forward)
+  (general-define-key :states 'normal "C-j" 'paredit-backward))
 
 ;;
 ;; dotenv
