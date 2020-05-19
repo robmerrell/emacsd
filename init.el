@@ -47,8 +47,8 @@
 (setq ring-bell-function 'ignore)
 
 ;; font
-(add-to-list 'default-frame-alist '(font . "Monaco-12"))
-(set-face-attribute 'default t :font "Monaco-12")
+(add-to-list 'default-frame-alist '(font . "Monaco-13"))
+(set-face-attribute 'default t :font "Monaco-13")
 
 ;; show trailing whitespace
 (setq-default show-trailing-whitespace 1)
@@ -138,6 +138,9 @@
     ":" '(execute-extended-command :which-key "M-x")
 
     ;; buffers
+    "h" '(previous-code-buffer :which-key "Previous Code Buffer")
+    "l" '(next-code-buffer :which-key "Next Code Buffer")
+
     "bn" '(next-code-buffer :which-key "Next Code Buffer")
     "bp" '(previous-code-buffer :which-key "Previous Code Buffer")
     "bl" '(list-buffers :which-key "Buffer List")
@@ -351,6 +354,7 @@
           ("*HTTP Response*" :align below :size 35 :noselect t)
           ("*go tests*" :align below :size 25 :select t)
           ("*compilation*" :align below :size 25 :select t)
+          ("*cider-error*" :align below :size 25 :noselect t)
           ("*lsp-help*" :regexp t :align below :size 8 :select t)
           ("*godoc.*" :regexp t :align below :size 25 :select t)
 	  ("*Racer Help*" :align below :size 25 :select t)
@@ -553,12 +557,13 @@
 (use-package paredit
   :ensure t
   :init
-  (add-hook 'clojure-mode-hook 'paredit-mode))
+  (add-hook 'janet-mode-hook 'paredit-mode)
+  (add-hook 'clojure-mode-hook 'paredit-mode)
+  (add-hook 'emacs-lisp-mode-hook 'paredit-mode))
 
 (use-package clojure-mode
   :ensure t
   :mode ("\\.clj\\'")
-
   :general
   (my-leader-def clojure-mode-map
     :states '(normal)
@@ -566,8 +571,17 @@
     "<SPC>E" '(cider-eval-last-sexp-to-repl :which-key "Eval last sexp to REPL")
     "<SPC>c" '(cider-eval-defun-at-point :which-key "Eval defun at point"))
   :config
+  (use-package flycheck-clj-kondo
+    :ensure t)
   (general-define-key :states 'normal "C-k" 'paredit-forward)
   (general-define-key :states 'normal "C-j" 'paredit-backward))
+
+;;
+;; Janet
+;;
+(use-package janet-mode
+  :ensure t
+  :mode ("\\.janet\\'"))
 
 ;;
 ;; dotenv
