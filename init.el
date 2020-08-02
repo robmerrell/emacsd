@@ -79,6 +79,11 @@
 ;; Package configs
 ;;
 
+(use-package quelpa-use-package
+  :ensure t
+  :init (setq quelpa-update-melpa-p nil)
+  :config (quelpa-use-package-activate-advice))
+
 (use-package my-buffer)
 
 ;; company mode
@@ -206,7 +211,11 @@
     "w1" '(select-window-1 :which-key "Window 1")
     "w2" '(select-window-2 :which-key "Window 2")
     "w3" '(select-window-3 :which-key "Window 3")
-    "w4" '(select-window-4 :which-key "Window 4")))
+    "w4" '(select-window-4 :which-key "Window 4")
+    "1" '(select-window-1 :which-key "Window 1")
+    "2" '(select-window-2 :which-key "Window 2")
+    "3" '(select-window-3 :which-key "Window 3")
+    "4" '(select-window-4 :which-key "Window 4")))
 
 ;; Evil mode
 (use-package evil
@@ -353,6 +362,7 @@
 	`(("*Flycheck errors*" :regexp t :align below :size 8 :select t)
           ("*HTTP Response*" :align below :size 35 :noselect t)
           ("*go tests*" :align below :size 25 :select t)
+          ("*exunit-compilation*" :align below :size 25 :select t)
           ("*compilation*" :align below :size 25 :select t)
           ("*cider-error*" :align below :size 25 :noselect t)
           ("*lsp-help*" :regexp t :align below :size 8 :select t)
@@ -386,8 +396,7 @@
     "cd" '(lsp-find-definition :which-key "Jump to Definition")
     "cn" '(lsp-rename :which-key "Rename")
     "cf" '(lsp-find-references :which-key "Find References")
-    "cs" '(lsp-workspace-restart :which-key "Restart LSP Server")
-    "ts" '(lsp-treemacs-symbols :which-key "Symbols"))
+    "cs" '(lsp-workspace-restart :which-key "Restart LSP Server"))
 
   :config
   (setq lsp-diagnostic-package :none)
@@ -408,17 +417,6 @@
 (use-package lsp-treemacs
   :ensure t
   :commands lsp-treemacs-errors-list)
-
-;; DAP
-(use-package dap-mode
-  :ensure t
-  :config
-  (dap-mode 1)
-  (require 'dap-go)
-  (use-package dap-ui
-    :ensure nil
-    :config
-    (dap-ui-mode 1)))
 
 ;; restclient-mode
 (use-package restclient
@@ -581,7 +579,11 @@
 ;;
 (use-package janet-mode
   :ensure t
-  :mode ("\\.janet\\'"))
+  :mode ("\\.janet\\'")
+  :config
+  (use-package ijanet)
+  (general-define-key :status '(normal insert) "C-c C-e" 'ijanet-eval-sexp-at-point))
+
 
 ;;
 ;; dotenv
@@ -595,7 +597,7 @@
 (use-package sql-indent
   :ensure t
   :custom
-  (sql-indent-offset 2))
+  (sql-indent-offset 1))
 
 
 (provide 'init.el)
