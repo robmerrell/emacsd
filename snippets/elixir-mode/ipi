@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: IO.puts
+# key: ipi
+# --
+IO.puts("-----------------------")
+IO.inspect($0)
+IO.puts("-----------------------")

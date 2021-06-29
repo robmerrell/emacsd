@@ -1,12 +1,15 @@
-;; open a new empty buffer
+;;; my-buffer.el --- functions for managing buffers
+;;; Commentary:
+;;; Code:
+
 (defun new-empty-buffer ()
-  "Create a new buffer called untitled(<n>)"
+  "Create a new buffer called untitled(<n>)."
   (interactive)
   (let ((newbuf (generate-new-buffer-name "untitled")))
     (switch-to-buffer newbuf)))
 
-;; move back and forth between buffers
 (defun next-code-buffer ()
+  "Switch to the next code buffer."
   (interactive)
   (let (( bread-crumb (buffer-name) ))
     (next-buffer)
@@ -17,6 +20,7 @@
       (next-buffer))))
 
 (defun previous-code-buffer ()
+  "Switch the the previous code buffer."
   (interactive)
   (let (( bread-crumb (buffer-name) ))
     (previous-buffer)
@@ -27,3 +31,4 @@
       (previous-buffer))))
 
 (provide 'my-buffer)
+;;; my-buffer.el ends here
