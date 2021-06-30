@@ -6,3 +6,10 @@ projectile-bookmarks.eld
 projectile.cache
 tramp
 network-security.data
+.cache/
+.dap-breakpoints
+.extension/
+.local/
+/.lsp-session-v1
+/TAGS
+/transient/
