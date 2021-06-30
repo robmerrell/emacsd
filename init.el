@@ -165,6 +165,7 @@
 (use-package evil
   :ensure t
   :init
+  (setq evil-want-keybinding nil)
   (setq evil-search-module 'evil-search)
   (setq evil-ex-complete-emacs-commands t)
   (setq evil-vsplit-window-right t)
@@ -217,6 +218,9 @@
   :config
   (ivy-mode 1))
 
+(use-package swiper
+  :ensure t)
+
 (use-package ivy-posframe
   :ensure t
   :diminish ivy-posframe-mode
@@ -244,8 +248,8 @@
 ;; rainbow delimiters
 (use-package rainbow-delimiters
   :ensure t
-  :hook ((elixir-mode . rainbow-delimiters-mode)))
-
+  :hook ((elixir-mode . rainbow-delimiters-mode)
+         (emacs-lisp-mode . rainbow-delimiters-mode)))
 
 ;; smartparens
 (use-package smartparens
@@ -352,7 +356,7 @@
     "ck" '(lsp-describe-thing-at-point :which-key "Help At Point")
     "cd" '(lsp-find-definition :which-key "Jump to Definition")
     "cn" '(lsp-rename :which-key "Rename")
-    "cf" '(lsp-find-references :which-key "Find References")
+    "cr" '(lsp-find-references :which-key "Find References")
     "cs" '(lsp-workspace-restart :which-key "Restart LSP Server"))
 
   :config
@@ -384,23 +388,9 @@
 
 
 ;;
-;; Emacs Lisp
-;;
-(use-package lisp-mode
-  :ensure nil
-  :general
-  (my-leader-def emacs-lisp-mode-map
-    :states '(normal)
-    "ce" '(eval-last-sexp :which-key "Eval last s-expr"))
-
-  (my-leader-def emacs-lisp-mode-map
-    :states '(visual)
-    "ce" '(eval-region :which-key "Eval region")))
-
-
-;;
 ;; Elixir
 ;;
+(defun swiper-search-def () "Search for 'def '." (interactive) (swiper "def "))
 (use-package elixir-mode
   :ensure t
   :mode ("\\.ex\\'" "\\.exs\\'" "mix\\.lock\\'")
@@ -410,7 +400,8 @@
   (my-leader-def elixir-mode-map
     :states '(normal)
     "cc" '(exunit-verify-single :which-key "Run Current Test")
-    "cp" '(exunit-rerun :which-key "Run Previous Test"))
+    "cp" '(exunit-rerun :which-key "Run Previous Test")
+    "cf" '(swiper-search-def :which-key "Functions"))
   :init
   (add-hook 'elixir-mode-hook (lambda () (setq tab-width 2)))
   (add-hook 'elixir-mode-hook
