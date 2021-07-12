@@ -58,6 +58,7 @@
 
 ;; line numbers
 (global-display-line-numbers-mode)
+(column-number-mode)
 
 ;; don't create backup~ or #auto-save# files
 (setq backup-by-copying t
@@ -74,6 +75,9 @@
 (setq gc-cons-threshold 100000000)
 (setq read-process-output-max (* 1024 1024))
 
+;; get pin in emacs instead of shell
+(setq epa-pinentry-mode 'loopback)
+
 
 ;;
 ;; Package configs
@@ -86,7 +90,6 @@
   :ensure t
   :config
   (general-create-definer my-leader-def :prefix "SPC")
-  (general-define-key :states 'insert "C-p" 'company-complete)
   (general-define-key :states 'insert "C-y" 'company-yasnippet)
 
   (my-leader-def
@@ -144,6 +147,7 @@
     "<SPC>f" "Files"
     "<SPC>g" "Git"
     "<SPC>p" "Project"
+    "<SPC>r" "REPL"
     "<SPC>t" "Treemacs"
     "<SPC>w" "Window")
   :diminish which-key-mode)
@@ -176,11 +180,6 @@
   (global-set-key (kbd "M-v") 'evil-paste-before)
 
   (evil-mode)
-
-  (use-package evil-collection
-    :ensure t
-    :config
-    (evil-collection-init 'magit))
 
   ;; comment toggling
   (use-package evil-nerd-commenter
@@ -245,11 +244,28 @@
 (font-lock-add-keywords 'elixir-mode '(("\@spec.*" . 'font-lock-doc-face)))
 
 
+;; solaire mode
+(use-package solaire-mode
+  :ensure t
+  :config
+  (solaire-global-mode +1))
+
+
+;; doom modeline
+(use-package doom-modeline
+  :ensure t
+  :config
+  (setq doom-modeline-lsp t)
+  (setq doom-modeline-env-enable-elixir t)
+  :init (doom-modeline-mode 1))
+
+
 ;; rainbow delimiters
 (use-package rainbow-delimiters
   :ensure t
   :hook ((elixir-mode . rainbow-delimiters-mode)
          (emacs-lisp-mode . rainbow-delimiters-mode)))
+
 
 ;; smartparens
 (use-package smartparens
@@ -257,9 +273,7 @@
   :init
   (smartparens-global-mode 1)
   :config
-
   (use-package smartparens-config)
-
   (setq
    smartparens-strict-mode t
    sp-autoskip-closing-pair 'always
@@ -310,31 +324,15 @@
   (setq shackle-rules
 	`(("*Flycheck errors*" :regexp t :align below :size 8 :select t)
           ("*lsp-help*" :regexp t :align below :size 25 :select t)
-          ("*HTTP Response*" :align below :size 35 :noselect t)
           ("*go tests*" :align below :size 25 :select t)
-          ("*exunit-compilation*" :align below :size 25 :select t)
+          ;; ("*exunit-compilation*" :align below :size 25 :select t)
+          ("*exunit-compilation*" :ignore t)
           ("*compilation*" :align below :size 25 :select t)
           ("*cider-error*" :align below :size 25 :noselect t)
           ("*godoc.*" :regexp t :align below :size 25 :select t)
+          ("*HTTP Response*" :regexp t :align below :size 25 :select t)
 	  ("*Racer Help*" :align below :size 25 :select t)
           ("*rust tests*" :align below :size 25 :select t))))
-
-
-;; company mode
-(use-package company
-  :ensure t
-  :init
-  (setq company-selection-wrap-around t)
-  (setq company-minimum-prefix-length 2)
-  (setq company-idle-delay 0.0)
-  (setq company-tooltip-limit 10)
-  (setq company-minimum-prefix-length 2)
-  (setq company-tooltip-flip-when-above t)
-  :config
-  (add-to-list 'company-backends '(company-capf))
-  (define-key company-active-map (kbd "C-p") #'company-select-previous)
-  (define-key company-active-map (kbd "C-n") #'company-select-next)
-  (global-company-mode))
 
 
 ;; yasnippet
@@ -345,6 +343,22 @@
   (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
   (use-package yasnippet-snippets :ensure t)
   (yas-global-mode 1))
+
+
+;; company mode
+(use-package company
+  :ensure t
+  :init
+  (setq company-selection-wrap-around t)
+  (setq company-minimum-prefix-length 2)
+  (setq company-idle-delay 0.0)
+  (setq company-tooltip-limit 15)
+  (setq company-minimum-prefix-length 2)
+  (setq company-tooltip-flip-when-above t)
+  (setq company-tooltip-align-annotations t)
+  :config
+  (add-to-list 'company-backends '(company-capf))
+  (global-company-mode))
 
 
 ;; lsp-mode
@@ -362,6 +376,7 @@
   :config
   (use-package lsp-ivy :ensure t)
   (setq lsp-headerline-breadcrumb-enable nil)
+  (setq lsp-enable-snippet t)
   (setq lsp-enable-symbol-highlighting nil)
   (add-to-list 'lsp-file-watch-ignored "vendor$")
   (add-to-list 'lsp-file-watch-ignored "deps$")
@@ -387,6 +402,32 @@
   :init (global-flycheck-mode))
 
 
+;; treemacs
+(use-package treemacs
+  :ensure t
+  :defer t
+  :general
+  (my-leader-def
+    :states '(normal)
+    "tt" '(treemacs :which-key "Toggle Treemacs")
+    "tp" '(treemacs-projectile :which-key "Add Projectile Project"))
+  :config
+  (setq treemacs-no-png-images t)
+  (use-package treemacs-projectile :ensure t)
+  (use-package treemacs-evil :ensure t))
+
+
+;; restclient
+(use-package restclient
+  :ensure t
+  :mode ("\\.http$" . restclient-mode)
+  :init
+  (add-hook 'restclient-mode-hook (lambda () (setq tab-width 2)))
+  :commands restclient-mode)
+(use-package my-rest)
+
+
+
 ;;
 ;; Elixir
 ;;
@@ -401,12 +442,24 @@
     :states '(normal)
     "cc" '(exunit-verify-single :which-key "Run Current Test")
     "cp" '(exunit-rerun :which-key "Run Previous Test")
-    "cf" '(swiper-search-def :which-key "Functions"))
+    "cf" '(swiper-search-def :which-key "Buffer Functions"))
   :init
   (add-hook 'elixir-mode-hook (lambda () (setq tab-width 2)))
   (add-hook 'elixir-mode-hook
             (lambda ()
               (add-hook 'before-save-hook #'lsp-format-buffer nil t))))
+
+
+;;
+;; Emacs Lisp
+;;
+(use-package emacs-lisp-mode
+  :bind
+  (("C-<right>" . sp-forward-slurp-sexp)
+   ("C-<left>" . sp-forward-barf-sexp)
+   ("C-M-<left>" . sp-backward-slurp-sexp)
+   ("C-M-<right>" . sp-backward-barf-sexp)))
+
 
 (provide 'init.el)
 ;;; init.el ends here
